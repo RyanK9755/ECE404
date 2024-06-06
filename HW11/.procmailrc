@@ -1,0 +1,44 @@
+SHELL=/bin/sh
+PATH=/usr/local/lib/mh:$PATH
+MAILDIR=$HOME/Mail
+LOGFILE=$HOME/Mail/logfile
+SENDMAIL=/usr/sbin/sendmail
+#VERBOSE=1
+VERBOSE=0
+EOL="
+"
+LOG="$EOL$EOL$EOL"
+LOG="New message log:$EOL"
+LOG=`perl GET_MESSAGE_INDEX`
+LOG="$EOL"
+
+
+
+## Recipe 1:
+# regex recipe traps all spam with multiple entries in the "from" header
+:0 :
+*^From.*(<[^\s]+@[^\s]+>,)+
+recipe_1
+
+# Recipe 2:
+# Spam is trapped just on the basis of the “Subject:” line in the email headers
+:0 H:
+* ^Subject:.*(career|professional|Viagra|affordable|cheap|depression)
+recipe_2
+# Recipe 3:
+# Spam is trapped on basis of the content (email body) unique to messages in the range of 64-66 
+:0 B:
+* (steady|celebrate|Poker)
+recipe_3
+# Recipe 4:
+# Spam is trapped on the basis of content types using compound rules
+:0 HB:
+* ^content-type: multipart/alternative
+* ^content-type: (text/plain|text/html)
+* Content-Transfer-Encoding: base64
+recipe_4
+
+#default
+#catch all other spam not fitting into previous recipes
+:0 :
+spamFolder
